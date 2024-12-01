@@ -5,25 +5,96 @@
 
 #include <gtest/gtest.h>
 #include "gemm.h"
+#include <tuple>
+#include <string>
+#include "utils.h"
 
 namespace swiftware::hpp {
-  TEST(MMTest, SmallTest) {
-    int m = 2;
-    int n = 2;
-    int k = 2;
-    // TODO generate random sparse matrices
-    float A[4] = {1, 2, 3, 4};
-    float B[4] = {1, 2, 3, 4};
-    float C[4] = {0, 0, 0, 0};
-    swiftware::hpp::gemmEfficientParallel(m, n, k, A, B, C, swiftware::hpp::ScheduleParams(32, 32, 8, 1));
-    float expected[4] = {7, 10, 15, 22};
-    for (int i = 0; i < m; ++i) {
-      for (int j = 0; j < n; ++j) {
-        EXPECT_EQ(C[i * n + j], expected[i * n + j]);
+
+  using MMTestParams = std::tuple<int, int, int, int, int, int, int, std::string>;
+
+// lets parameterize the test
+// m, n, k, t1, t2, cs, nt, name
+  class MMTest : public ::testing::TestWithParam<MMTestParams> {
+  protected:
+    int m, n, k, t1, t2, cs, nt;
+    std::string name;
+    DenseMatrix *A, *B, *C, *E;
+
+    static void gemmBaseline(int m, int n, int k, const float *A, const float *B, float *C) {
+      for (int i = 0; i < m; ++i) {
+        for (int l = 0; l < k; ++l) {
+          for (int j = 0; j < n; ++j) {
+              C[i * n + j] += A[i * k + l] * B[l * n + j];
+          }
       }
     }
   }
 
-  // TODO add more tests for GEMM OpenCL
+ void SetUp() override {
+    // Code here will be called immediately after the constructor (right before each test).
+    std::tie(m, n, k, t1, t2, cs, nt, name) = GetParam();
+    std::cout << "Running " << name << std::endl;
+    A = new DenseMatrix(m, k);
+    B = new DenseMatrix(k, n);
+    C = new DenseMatrix(m, n);
+    E = new DenseMatrix(m, n);
+
+    for (int i = 0; i < m * k; ++i) {
+      A->data[i] = (float)(i+1.0)/(m*k);
+    }
+    for (int i = 0; i < k * n; ++i) {
+      B->data[i] = (float)(i+1.0)/(k*n);
+    }
+    for (int i = 0; i < m * n; ++i) {
+      E->data[i] = 0.0;
+      C->data[i] = 0.0;
+    }
+  }
+
+  void TearDown() override {
+    // Code here will be called immediately after each test (right before the destructor).
+    delete A;
+    delete B;
+    delete C;
+    delete E;
+  }
+};
+
+  TEST_P(MMTest, TestSingleRowDecomp) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuSingleRowDecomp(m, n, k, A->data.data(), B->data.data(), C->data.data(), swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+      for (int j = 0; j < n; ++j) {
+        EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j])/E->data[i * n + j]), 1e-3);
+      }
+    }
+  }
+
+  TEST_P(MMTest, Test1DTile) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuSingleRowDecomp(m, n, k, A->data.data(), B->data.data(), C->data.data(), swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+      for (int j = 0; j < n; ++j) {
+        EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j])/E->data[i * n + j]), 1e-3);
+      }
+    }
+  }
+
+  TEST_P(MMTest, Test2DTile) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuSingleRowDecomp(m, n, k, A->data.data(), B->data.data(), C->data.data(), swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+      for (int j = 0; j < n; ++j) {
+        EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j])/E->data[i * n + j]), 1e-3);
+      }
+    }
+  }
+
+// m, n, k, blockDim1, t2, cs, nt, srPercentage, name
+  INSTANTIATE_TEST_SUITE_P(MMTest, MMTest, ::testing::Values(
+    MMTestParams(512, 512, 512, 64, 32, 8, 1, "SameSizePwrOf2")
+    // MMTestParams(500, 500, 500, 64, 32, 8, 1, "SameSizeNonPwrOf2")
+  ));
 
 }

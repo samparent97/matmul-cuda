@@ -1,0 +1,21 @@
+Running main() from /root/sam/matmul-cuda/build/_deps/googlebenchmark-build/third_party/googletest/src/googletest/src/gtest_main.cc
+[==========] Running 3 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 3 tests from MMTest/MMTest
+[ RUN      ] MMTest/MMTest.TestSingleRowDecomp/0
+Running SameSizePwrOf2
+Time taken: 1.43493e-42 ms
+[       OK ] MMTest/MMTest.TestSingleRowDecomp/0 (272 ms)
+[ RUN      ] MMTest/MMTest.Test1DTile/0
+Running SameSizePwrOf2
+Time taken: 1.43493e-42 ms
+[       OK ] MMTest/MMTest.Test1DTile/0 (22 ms)
+[ RUN      ] MMTest/MMTest.Test2DTile/0
+Running SameSizePwrOf2
+Time taken: 1.43493e-42 ms
+[       OK ] MMTest/MMTest.Test2DTile/0 (30 ms)
+[----------] 3 tests from MMTest/MMTest (325 ms total)
+
+[----------] Global test environment tear-down
+[==========] 3 tests from 1 test suite ran. (325 ms total)
+[  PASSED  ] 3 tests.

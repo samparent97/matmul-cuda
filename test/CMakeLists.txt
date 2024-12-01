@@ -6,6 +6,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 add_executable( lab4_mm_test
         mm_test.cpp
         ${CMAKE_SOURCE_DIR}/src/gemm.cpp
+        ${CMAKE_SOURCE_DIR}/src/gemm.cu
         )
 target_link_libraries( lab4_mm_test
         PRIVATE
