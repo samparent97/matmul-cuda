@@ -93,8 +93,11 @@ namespace swiftware::hpp {
 
 // m, n, k, blockDim1, t2, cs, nt, srPercentage, name
   INSTANTIATE_TEST_SUITE_P(MMTest, MMTest, ::testing::Values(
-    MMTestParams(512, 512, 512, 64, 32, 8, 1, "SameSizePwrOf2")
-    // MMTestParams(500, 500, 500, 64, 32, 8, 1, "SameSizeNonPwrOf2")
+    MMTestParams(512, 512, 512, 64, 32, 8, 1, "SameSizePwrOf2"),
+    MMTestParams(4096, 4096, 4096, 64, 32, 8, 1, "FullSize"),
+    MMTestParams(500, 500, 500, 64, 32, 8, 1, "SameSizeNonPwrOf2"),
+    MMTestParams(10000, 10000, 50, 64, 32, 8, 1, "TallSkinny"),
+    MMTestParams(50, 50, 10000, 64, 32, 8, 1, "ShortWide")
   ));
 
 }

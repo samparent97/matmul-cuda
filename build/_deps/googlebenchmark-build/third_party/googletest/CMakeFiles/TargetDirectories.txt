@@ -1,3 +1,0 @@
-/root/sam/matmul-cuda/build/_deps/googlebenchmark-build/third_party/googletest/CMakeFiles/googletest.dir
-/root/sam/matmul-cuda/build/_deps/googlebenchmark-build/third_party/googletest/CMakeFiles/edit_cache.dir
-/root/sam/matmul-cuda/build/_deps/googlebenchmark-build/third_party/googletest/CMakeFiles/rebuild_cache.dir

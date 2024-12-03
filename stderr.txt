@@ -1,4 +1,0 @@
-CMake Warning at CMakeLists.txt:37 (message):
-  Did not find Google Test sources! Fetching from web...
-
-

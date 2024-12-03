@@ -1,5 +1,0 @@
-if(EXISTS "/root/sam/matmul-cuda/build/test/lab4_mm_test[1]_tests.cmake")
-  include("/root/sam/matmul-cuda/build/test/lab4_mm_test[1]_tests.cmake")
-else()
-  add_test(lab4_mm_test_NOT_BUILT lab4_mm_test_NOT_BUILT)
-endif()

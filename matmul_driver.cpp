@@ -89,6 +89,8 @@ BENCHMARK_CAPTURE(BM_GEMM, gemm_optimized, swiftware::hpp::gemmEfficientParallel
     // ->Args({1024, 1024, 1024, 64, 32, 1, NUM_THREADS, 1})
     // ->Args({2048, 2048, 2048, 64, 32, 1, NUM_THREADS, 1})
     ->Args({4096, 4096, 4096, 64, 32, 1, NUM_THREADS, 1})
+    ->Args({10000, 10000, 50, 64, 32, 1, NUM_THREADS, 1})
+    ->Args({50, 50, 10000, 64, 32, 1, NUM_THREADS, 1})
 ;
 
 BENCHMARK_CAPTURE(BM_MATMUL_CUDA, cuda_matmul, swiftware::hpp::gemmGpuSingleRowDecomp)
@@ -96,13 +98,44 @@ BENCHMARK_CAPTURE(BM_MATMUL_CUDA, cuda_matmul, swiftware::hpp::gemmGpuSingleRowD
     // ->Args({1024, 1024, 1024, 256, 32})->UseManualTime()->Iterations(10)
     // ->Args({2048, 2048, 2048, 256, 32})->UseManualTime()->Iterations(10)
     // ->Args({64, 64, 64, 32, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 32, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 64, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 128, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 256, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 512, 32})->UseManualTime()->Iterations(10)
-    ->Args({4096, 4096, 4096, 1024, 32})->UseManualTime()->Iterations(10)
 
+    // ->Args({8, 8, 8, 1, 32})->UseManualTime()->Iterations(10)
+
+
+
+    // ->Args({4096, 4096, 4096, 1, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 2, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 4, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 8, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 16, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 32, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 64, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 128, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 256, 32})->UseManualTime()->Iterations(10)
+    // ->Args({4096, 4096, 4096, 512, 32})->UseManualTime()->Iterations(10)
+    ->Args({4096, 4096, 4096, 1024, 32})
+    ->UseManualTime()
+    ->Iterations(10)
+
+    // ->Args({10000, 10000, 50, 16, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 32, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 64, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 128, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 256, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 512, 32})->UseManualTime()->Iterations(10)
+    // ->Args({10000, 10000, 50, 1024, 32})->UseManualTime()->Iterations(10)
+
+    // ->Args({50, 50, 10000, 16, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 32, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 64, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 128, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 256, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 512, 32})->UseManualTime()->Iterations(10)
+    // ->Args({50, 50, 10000, 1024, 32})->UseManualTime()->Iterations(10)
+;
+
+BENCHMARK_CAPTURE(BM_MATMUL_CUDA, cuda_matmul, swiftware::hpp::gemmGpuOneDimTile)
+    ->Args({4096, 4096, 4096, 32, 32})->UseManualTime()->Iterations(10)
 ;
 
 
