@@ -9,7 +9,6 @@
 
 namespace swiftware::hpp {
 
-  // please do not change below
 /// \brief Matrix-matrix multiplication
 /// \param m Number of rows of A and C
 /// \param n Number of columns of B and C
