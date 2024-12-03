@@ -18,7 +18,6 @@ namespace swiftware::hpp {
 /// \param C Matrix C
   void gemmEfficientParallel(int m, int n, int k, const float *A, const float *B, float *C, ScheduleParams Sp);
   float gemmGpuSingleRowDecomp(int m, int n, int k, const float *A, const float *B, float *C, ScheduleParams Sp);  
-  float vectorMultiplyWrapper(float* h_A, float* h_B, float* h_C, int N);
   float gemmGpuOneDimTile(int m, int n, int k, const float *h_A,
                              const float *h_B, float *h_C, ScheduleParams Sp);
 }
