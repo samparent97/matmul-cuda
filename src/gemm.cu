@@ -140,16 +140,14 @@ float gemmGpuSingleElementDecomp(int m, int n, int k, const float* h_A,
 
 template <int TileSize>
 __global__ void oneDimTile(float* A, float* B, float* C, int m, int n, int k) {
-    // Details regarding this thread
-    int by = blockIdx.y;
-    int bx = blockIdx.x;
+    int block_y = blockIdx.y;
+    int block_x = blockIdx.x;
 
-    int ty = threadIdx.y;
-    int tx = threadIdx.x;
+    int thread_y = threadIdx.y;
+    int thread_x = threadIdx.x;
 
-    // Working on C[i,j]
-    int i = TileSize * by + ty;
-    int j = TileSize * bx + tx;
+    int C_i = TileSize * block_y + thread_y;
+    int C_j = TileSize * block_x + thread_x;
 
     // Allocating shared memory
     __shared__ float sh_A[TileSize][TileSize];
@@ -159,24 +157,35 @@ __global__ void oneDimTile(float* A, float* B, float* C, int m, int n, int k) {
     float value = 0;
     for (int tileCount = 0; tileCount < ceil((float)k / TileSize);
          tileCount++) {
-        // Load Tiles into shared memory
-        if ((i < m) && ((tileCount * TileSize + tx) < k))
-            sh_A[ty][tx] = A[(i)*k + tileCount * TileSize + tx];
-        else
-            sh_A[ty][tx] = 0.0f;
+        
+        // Load a tile of A into shared memory
+        if ((C_i < m) && ((tileCount * TileSize + thread_x) < k)) {
+            sh_A[thread_y][thread_x] = A[(C_i)*k + tileCount * TileSize + thread_x];
+        } else {
+            sh_A[thread_y][thread_x] = 0.0f;
+        }
 
-        if (((tileCount * TileSize + ty) < k) && (j < n))
-            sh_B[ty][tx] = B[(tileCount * TileSize + ty) * n + j];
-        else
-            sh_B[ty][tx] = 0.0f;
+        // Load a tile of B into shared memory
+        if ((C_j < n) && ((tileCount * TileSize + thread_y) < k)) {
+            sh_B[thread_y][thread_x] = B[(tileCount * TileSize + thread_y) * n + C_j];
+        } else {
+            sh_B[thread_y][thread_x] = 0.0f;
+        }
+
         __syncthreads();
 
-        // Dot product
-        for (int k = 0; k < TileSize; k++) value += sh_A[ty][k] * sh_B[k][tx];
+        // Perform the dot product
+        for (int k = 0; k < TileSize; k++) {
+            value += sh_A[thread_y][k] * sh_B[k][thread_x];
+        }
+
         __syncthreads();
     }
-    // Assigning calculated value
-    if ((i < m) && (j < n)) C[i * n + j] = value;
+
+    // Assign the calculated value to the correct position in C
+    if ((C_i < m) && (C_j < n)) {
+        C[C_i * n + C_j] = value;
+    }
 }
 
 float gemmGpuOneDimTile(int m, int n, int k, const float* h_A, const float* h_B,

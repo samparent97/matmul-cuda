@@ -115,6 +115,7 @@ INSTANTIATE_TEST_SUITE_P(
         MMTestParams(4096, 4096, 4096, 64, 32, 8, 1, "FullSize"),
         MMTestParams(500, 500, 500, 64, 32, 8, 1, "SameSizeNonPwrOf2"),
         MMTestParams(10000, 10000, 50, 64, 32, 8, 1, "TallSkinny"),
-        MMTestParams(50, 50, 10000, 64, 32, 8, 1, "ShortWide")));
+        MMTestParams(50, 50, 10000, 64, 32, 8, 1, "ShortWide"),
+        MMTestParams(1024, 1024, 1024, 64, 32, 8, 1, "Square")));
 
 }  // namespace swiftware::hpp
