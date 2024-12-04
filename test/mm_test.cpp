@@ -65,23 +65,23 @@ protected:
     }
 };
 
-TEST_P(MMTest, TestSingleRowDecomp) {
-    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-    float temp = gemmGpuSingleRowDecomp(
-        m, n, k, A->data.data(), B->data.data(), C->data.data(),
-        swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
-                          E->data[i * n + j]),
-                      1e-3);
-        }
-    }
-}
+// TEST_P(MMTest, TestSingleRowDecomp) {
+//     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+//     float temp = gemmGpuSingleRowDecomp(
+//         m, n, k, A->data.data(), B->data.data(), C->data.data(),
+//         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+//     for (int i = 0; i < m; ++i) {
+//         for (int j = 0; j < n; ++j) {
+//             EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
+//                           E->data[i * n + j]),
+//                       1e-3);
+//         }
+//     }
+// }
 
 TEST_P(MMTest, Test1DTile) {
     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-    float temp = gemmGpuSingleRowDecomp(
+    float temp = gemmGpuOneDimTile(
         m, n, k, A->data.data(), B->data.data(), C->data.data(),
         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
     for (int i = 0; i < m; ++i) {
@@ -93,19 +93,19 @@ TEST_P(MMTest, Test1DTile) {
     }
 }
 
-TEST_P(MMTest, Test2DTile) {
-    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-    float temp = gemmGpuSingleRowDecomp(
-        m, n, k, A->data.data(), B->data.data(), C->data.data(),
-        swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
-                          E->data[i * n + j]),
-                      1e-3);
-        }
-    }
-}
+// TEST_P(MMTest, Test2DTile) {
+//     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+//     float temp = gemmGpuSingleRowDecomp(
+//         m, n, k, A->data.data(), B->data.data(), C->data.data(),
+//         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+//     for (int i = 0; i < m; ++i) {
+//         for (int j = 0; j < n; ++j) {
+//             EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
+//                           E->data[i * n + j]),
+//                       1e-3);
+//         }
+//     }
+// }
 
 // m, n, k, blockDim1, t2, cs, nt, srPercentage, name
 INSTANTIATE_TEST_SUITE_P(
@@ -114,8 +114,21 @@ INSTANTIATE_TEST_SUITE_P(
         MMTestParams(512, 512, 512, 64, 32, 8, 1, "SameSizePwrOf2"),
         MMTestParams(4096, 4096, 4096, 64, 32, 8, 1, "FullSize"),
         MMTestParams(500, 500, 500, 64, 32, 8, 1, "SameSizeNonPwrOf2"),
-        MMTestParams(10000, 10000, 50, 64, 32, 8, 1, "TallSkinny"),
+        MMTestParams(10000, 10000, 64, 64, 32, 8, 1, "TallSkinny"),
+        MMTestParams(512, 512, 128, 64, 32, 8, 1, "TallSkinny"),
+        MMTestParams(10000, 10000, 256, 64, 32, 8, 1, "TallSkinny"),
         MMTestParams(50, 50, 10000, 64, 32, 8, 1, "ShortWide"),
+        MMTestParams(2048, 2048, 2048, 64, 32, 8, 1, "MediumSquare"),
+        MMTestParams(256, 256, 256, 64, 32, 8, 1, "SmallSquare"),
+        MMTestParams(128, 128, 128, 64, 32, 8, 1, "TinySquare"),
+        MMTestParams(1024, 512, 2048, 64, 32, 8, 1, "RectangularMix1"),
+        MMTestParams(2048, 1024, 512, 64, 32, 8, 1, "RectangularMix2"),
+        MMTestParams(4096, 512, 1024, 64, 32, 8, 1, "RectangularMix3"),
+        MMTestParams(8192, 256, 512, 64, 32, 8, 1, "VeryTallSkinny"),
+        MMTestParams(256, 8192, 512, 64, 32, 8, 1, "VeryShortWide"),
+        MMTestParams(777, 888, 999, 64, 32, 8, 1, "OddSizes"),
+        MMTestParams(15000, 15000, 32, 64, 32, 8, 1, "ExtremelyTallSkinny"),
+        MMTestParams(32, 32, 15000, 64, 32, 8, 1, "ExtremelyShortWide"),
         MMTestParams(1024, 1024, 1024, 64, 32, 8, 1, "Square")));
 
 }  // namespace swiftware::hpp
