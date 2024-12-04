@@ -134,7 +134,7 @@ static void BM_MATMUL_CUDA(benchmark::State &state,
     // ->Args({50, 50, 10000, 1024, 32})->UseManualTime()->Iterations(10)
 // ;
 
-BENCHMARK_CAPTURE(BM_MATMUL_CUDA, cuda_matmul, swiftware::hpp::gemmGpuOneDimTile)
+BENCHMARK_CAPTURE(BM_MATMUL_CUDA, cuda_matmul, swiftware::hpp::gemmGpuTwoDimTile)
     ->Args({4096, 4096, 4096, 32, 32})->UseManualTime()->Iterations(1)
 ;
 

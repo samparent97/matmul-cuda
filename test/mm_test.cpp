@@ -65,23 +65,9 @@ protected:
     }
 };
 
-// TEST_P(MMTest, TestSingleRowDecomp) {
-//     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-//     float temp = gemmGpuSingleRowDecomp(
-//         m, n, k, A->data.data(), B->data.data(), C->data.data(),
-//         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
-//     for (int i = 0; i < m; ++i) {
-//         for (int j = 0; j < n; ++j) {
-//             EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
-//                           E->data[i * n + j]),
-//                       1e-3);
-//         }
-//     }
-// }
-
-TEST_P(MMTest, Test1DTile) {
+TEST_P(MMTest, TestSingleRowDecomp) {
     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-    float temp = gemmGpuOneDimTile(
+    float temp = gemmGpuSingleRowDecomp(
         m, n, k, A->data.data(), B->data.data(), C->data.data(),
         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
     for (int i = 0; i < m; ++i) {
@@ -93,19 +79,47 @@ TEST_P(MMTest, Test1DTile) {
     }
 }
 
-// TEST_P(MMTest, Test2DTile) {
-//     gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
-//     float temp = gemmGpuSingleRowDecomp(
-//         m, n, k, A->data.data(), B->data.data(), C->data.data(),
-//         swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
-//     for (int i = 0; i < m; ++i) {
-//         for (int j = 0; j < n; ++j) {
-//             EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
-//                           E->data[i * n + j]),
-//                       1e-3);
-//         }
-//     }
-// }
+TEST_P(MMTest, TestMultiRowDecomp) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuMultiRowDecomp(
+        m, n, k, A->data.data(), B->data.data(), C->data.data(),
+        swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
+                          E->data[i * n + j]),
+                      1e-3);
+        }
+    }
+}
+
+TEST_P(MMTest, TestSingleElementDecomp) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuSingleElementDecomp(
+        m, n, k, A->data.data(), B->data.data(), C->data.data(),
+        swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
+                          E->data[i * n + j]),
+                      1e-3);
+        }
+    }
+}
+
+TEST_P(MMTest, Test2DTile) {
+    gemmBaseline(m, n, k, A->data.data(), B->data.data(), E->data.data());
+    float temp = gemmGpuTwoDimTile(
+        m, n, k, A->data.data(), B->data.data(), C->data.data(),
+        swiftware::hpp::ScheduleParams(1024, t2, cs, nt));
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            EXPECT_LT(abs((C->data[i * n + j] - E->data[i * n + j]) /
+                          E->data[i * n + j]),
+                      1e-3);
+        }
+    }
+}
 
 // m, n, k, blockDim1, t2, cs, nt, srPercentage, name
 INSTANTIATE_TEST_SUITE_P(
@@ -129,6 +143,12 @@ INSTANTIATE_TEST_SUITE_P(
         MMTestParams(777, 888, 999, 64, 32, 8, 1, "OddSizes"),
         MMTestParams(15000, 15000, 32, 64, 32, 8, 1, "ExtremelyTallSkinny"),
         MMTestParams(32, 32, 15000, 64, 32, 8, 1, "ExtremelyShortWide"),
+        MMTestParams(1, 1, 1, 64, 32, 8, 1, "SingleElement"),
+        MMTestParams(1, 1000, 1, 64, 32, 8, 1, "SingleRowColumn"),
+        MMTestParams(1000, 1, 1, 64, 32, 8, 1, "SingleColumnRow"),
+        MMTestParams(1, 1, 1000, 64, 32, 8, 1, "SingleRowColumnLong"),
+        MMTestParams(3, 5, 7, 64, 32, 8, 1, "SmallPrimes"),
+        MMTestParams(2047, 2047, 2047, 64, 32, 8, 1, "AlmostPowerTwo"),
         MMTestParams(1024, 1024, 1024, 64, 32, 8, 1, "Square")));
 
 }  // namespace swiftware::hpp

@@ -1,7 +1,6 @@
 #include <cuda_runtime.h>
 
 #include <cassert>
-#include <iostream>
 
 #include "gemm.h"
 #include "utils.h"
@@ -216,57 +215,6 @@ float gemmGpuSingleElementDecomp(int m, int n, int k, const float* h_A,
 }
 
 template <int TileSize>
-__global__ void oneDimTile(float* A, float* B, float* C, int m, int n, int k) {
-    int block_y = blockIdx.y;
-    int block_x = blockIdx.x;
-
-    int thread_y = threadIdx.y;
-    int thread_x = threadIdx.x;
-
-    int C_i = TileSize * block_y + thread_y;
-    int C_j = TileSize * block_x + thread_x;
-
-    // Allocating shared memory
-    __shared__ float sh_A[TileSize][TileSize];
-    __shared__ float sh_B[TileSize][TileSize];
-
-    // Parallel mat mul
-    float value = 0;
-    for (int tileCount = 0; tileCount < ceil((float)k / TileSize);
-         tileCount++) {
-        // Load a tile of A into shared memory
-        if ((C_i < m) && ((tileCount * TileSize + thread_x) < k)) {
-            sh_A[thread_y][thread_x] =
-                A[(C_i)*k + tileCount * TileSize + thread_x];
-        } else {
-            sh_A[thread_y][thread_x] = 0.0f;
-        }
-
-        // Load a tile of B into shared memory
-        if ((C_j < n) && ((tileCount * TileSize + thread_y) < k)) {
-            sh_B[thread_y][thread_x] =
-                B[(tileCount * TileSize + thread_y) * n + C_j];
-        } else {
-            sh_B[thread_y][thread_x] = 0.0f;
-        }
-
-        __syncthreads();
-
-        // Perform the dot product
-        for (int k = 0; k < TileSize; k++) {
-            value += sh_A[thread_y][k] * sh_B[k][thread_x];
-        }
-
-        __syncthreads();
-    }
-
-    // Assign the calculated value to the correct position in C
-    if ((C_i < m) && (C_j < n)) {
-        C[C_i * n + C_j] = value;
-    }
-}
-
-template <int TileSize>
 __global__ void twoDimTile(float* A, float* B, float* C, int m, int n, int k) {
     // TODO
     __shared__ float Asub[TileSize][TileSize];
@@ -310,7 +258,7 @@ __global__ void twoDimTile(float* A, float* B, float* C, int m, int n, int k) {
     }
 }
 
-float gemmGpuOneDimTile(int m, int n, int k, const float* h_A, const float* h_B,
+float gemmGpuTwoDimTile(int m, int n, int k, const float* h_A, const float* h_B,
                         float* h_C, ScheduleParams Sp) {
     const size_t sizeA = m * k;
     const size_t sizeB = k * n;
